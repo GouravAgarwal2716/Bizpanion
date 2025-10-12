@@ -1,0 +1,61 @@
+version: "3.9"
+
+services:
+  backend:
+    image: node:18
+    working_dir: /app
+    volumes:
+      - ./backend:/app
+    environment:
+      - PORT=5000
+      - NODE_ENV=development
+      - OPENAI_API_KEY=${OPENAI_API_KEY}
+      - JWT_SECRET=${JWT_SECRET:-devsecret}
+      - RAG_SERVICE_URL=http://rag:5001
+    command: bash -lc "npm ci && npm run dev"
+    ports:
+      - "5000:5000"
+    depends_on:
+      - rag
+
+  rag:
+    image: python:3.10-slim
+    working_dir: /app
+    volumes:
+      - ./backend:/app
+    environment:
+      - PYTHONDONTWRITEBYTECODE=1
+      - PYTHONUNBUFFERED=1
+    command: bash -lc "pip install --no-cache-dir -r requirements.txt && python rag_service.py"
+    expose:
+      - "5001"
+    ports:
+      - "5001:5001"
+
+  frontend:
+    image: node:18
+    working_dir: /app
+    volumes:
+      - ./frontend:/app
+    environment:
+      - BROWSER=none
+      - CI=false
+      # If your frontend needs to know API base URL, configure REACT_APP_API
+      # - REACT_APP_API=http://localhost:5000
+    command: bash -lc "npm ci && npm start"
+    ports:
+      - "3000:3000"
+    depends_on:
+      - backend
+
+# Usage:
+# 1) Ensure OPENAI_API_KEY and JWT_SECRET are available in your shell environment (or a .env file in the same directory as this compose).
+# 2) docker compose up --build
+#    - Backend on http://localhost:5000
+#    - RAG service on http://localhost:5001
+#    - Frontend (React dev server) on http://localhost:3000
+#
+# Notes:
+# - This compose uses official language images and mounts your source via volumes for rapid dev.
+# - If you prefer Dockerfiles, you can swap images for "build: ./backend" or "build: ./frontend".
+# - RAG service reads backend/requirements.txt and runs backend/rag_service.py.

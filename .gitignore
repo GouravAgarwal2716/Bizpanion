@@ -1,0 +1,14 @@
+node_modules/
+.env
+*.sqlite
+__pycache__/
+.vscode/
+.DS_Store
+dist/
+build/
+
+# local envs
+.env
+node_modules
+*.sqlite
+.DS_Store
