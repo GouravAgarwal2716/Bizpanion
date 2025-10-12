@@ -32,22 +32,40 @@ load_dotenv(os.path.join(os.path.dirname(__file__), '.env'))
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 DB_PATH = os.environ.get('RAG_DB_PATH', os.path.join(BASE_DIR, 'database.sqlite'))
 
-# Initialize OpenAI client
-openai_client = OpenAI(api_key=os.environ.get("OPENAI_API_KEY"))
+# Initialize OpenAI client (optional; allow service to run without key)
+OPENAI_API_KEY = os.environ.get("OPENAI_API_KEY")
+try:
+    openai_client = OpenAI(api_key=OPENAI_API_KEY) if OPENAI_API_KEY else None
+except Exception:
+    openai_client = None
 EMBEDDING_MODEL = os.environ.get("EMBEDDING_MODEL", "text-embedding-3-small")  # prefer modern embedding model
 
 import time
 
+def local_hash_embedding(text, dim=256):
+    h = hashlib.md5(text.encode("utf-8")).digest()
+    seed = int.from_bytes(h, "big") % (2**32)
+    rng = np.random.default_rng(seed)
+    vec = rng.standard_normal(dim)
+    norm = np.linalg.norm(vec)
+    if norm == 0:
+        return vec.tolist()
+    return (vec / norm).tolist()
+
 def get_embedding_with_retries(text, retries=4, delay=1):
-    for attempt in range(1, retries+1):
+    if openai_client is None:
+        # Fallback: deterministic local embedding (no external API needed)
+        return local_hash_embedding(text)
+    for attempt in range(1, retries + 1):
         try:
             response = openai_client.embeddings.create(input=text, model=EMBEDDING_MODEL)
             return response.data[0].embedding
         except Exception as e:
             print(f"Embedding attempt {attempt} failed: {e}")
             if attempt == retries:
-                raise
-            time.sleep(delay * (2 ** (attempt-1)))
+                # Last attempt failed; fallback to local embedding to keep service usable
+                return local_hash_embedding(text)
+            time.sleep(delay * (2 ** (attempt - 1)))
 
 
 # Simple in-memory vector store for MVP
@@ -310,4 +328,6 @@ if __name__ == '__main__':
     print("Vector store initialized")
     print("Ready to process documents!")
     
-    app.run(host='0.0.0.0', port=5001, debug=True)
+    port = int(os.environ.get("PORT", 5001))
+    debug = os.environ.get("FLASK_DEBUG", "0") == "1"
+    app.run(host='0.0.0.0', port=port, debug=debug)
