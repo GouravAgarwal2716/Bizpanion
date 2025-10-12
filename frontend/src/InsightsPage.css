@@ -1,0 +1,82 @@
+.insights-page-container {
+    padding: 1rem;
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+.insights-header {
+    text-align: center;
+    margin-bottom: 2rem;
+}
+
+.insights-header h2 {
+    font-size: 1.75rem;
+    font-weight: 700;
+}
+
+.insights-header p {
+    color: var(--text-secondary);
+}
+
+.insights-header .edit-btn {
+    margin-top: 1rem;
+}
+
+.insights-content .loading-state,
+.insights-content .empty-state {
+    text-align: center;
+    padding: 3rem 1rem;
+    background: var(--bg-secondary);
+    border-radius: 16px;
+    border: 1px solid var(--border-primary);
+}
+
+.insights-list-display {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 1rem;
+}
+
+.insight-card {
+    background: var(--bg-secondary);
+    border: 1px solid var(--border-primary);
+    border-radius: 12px;
+    padding: 1.5rem;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+}
+
+.insight-card-content p {
+    margin: 0;
+    line-height: 1.6;
+    color: var(--text-primary);
+}
+
+.insight-card-footer {
+    margin-top: 1rem;
+    font-size: 0.85rem;
+    color: var(--text-secondary);
+    border-top: 1px solid var(--border-primary);
+    padding-top: 0.75rem;
+}
+
+.delete-insight-btn {
+    background: transparent;
+    border: 1px solid var(--error-600);
+    color: var(--error-600);
+    padding: 0.25rem 0.75rem;
+    border-radius: var(--radius-md);
+    font-size: 0.8rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all var(--transition-normal);
+}
+
+.delete-insight-btn:hover {
+    background: var(--error-600);
+    color: white;
+}

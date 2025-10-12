@@ -1,0 +1,107 @@
+.auth-container {
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: #f6f8fa;
+  }
+  
+  .auth-form {
+    background: #fff;
+    padding: 2.5rem 2rem 2rem 2rem;
+    border-radius: 1.25rem;
+    box-shadow: 0 8px 32px rgba(0,0,0,0.12);
+    display: flex;
+    flex-direction: column;
+    min-width: 320px;
+    max-width: 90vw;
+  }
+  
+  .auth-form h2 {
+    margin-bottom: 1.5rem;
+    color: #1a365d;
+    font-weight: 700;
+    text-align: center;
+  }
+  
+  .auth-form input {
+    margin-bottom: 1rem;
+    padding: 0.75rem 1rem;
+    border: 1px solid #d1d5db;
+    border-radius: 0.75rem;
+    font-size: 1rem;
+    outline: none;
+    transition: border 0.2s;
+  }
+  
+  .auth-form input:focus {
+    border-color: #2563eb;
+  }
+  
+  .auth-form button[type="submit"] {
+    background: #2563eb;
+    color: #fff;
+    border: none;
+    border-radius: 0.75rem;
+    padding: 0.75rem 1rem;
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    margin-bottom: 0.5rem;
+    transition: background 0.2s;
+  }
+  
+  .auth-form button[type="submit"]:hover {
+    background: #1e40af;
+  }
+  
+  .auth-toggle {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 0.5rem;
+    margin-bottom: 0.5rem;
+  }
+  
+  .link-btn {
+    background: none;
+    border: none;
+    color: #2563eb;
+    cursor: pointer;
+    font-weight: 600;
+    text-decoration: underline;
+    padding: 0;
+  }
+  
+  .auth-error {
+    color: #dc2626;
+    text-align: center;
+    margin-top: 0.5rem;
+    font-size: 0.95rem;
+  }
+
+  /* Role selector polish */
+  .auth-form .form-row {
+    margin-bottom: 0.75rem;
+  }
+  .auth-form .field-label {
+    font-size: 0.9rem;
+    color: #4b5563;
+    font-weight: 600;
+  }
+  .auth-form .theme-select.business-select {
+    -webkit-appearance: none;
+    appearance: none;
+    padding: 0.75rem 1rem;
+    border-radius: 12px;
+    border: 1px solid #d1d5db;
+    background: linear-gradient(180deg, rgba(255,255,255,0.95), rgba(255,255,255,0.85));
+    outline: none;
+    transition: border-color .2s, box-shadow .2s, background .2s;
+    font-size: 1rem;
+  }
+  .auth-form .theme-select.business-select:focus {
+    border-color: #2563eb;
+    box-shadow: 0 0 0 3px rgba(37,99,235,0.15);
+    background: #fff;
+  }
