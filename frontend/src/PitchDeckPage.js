@@ -33,7 +33,7 @@ export default function PitchDeckPage({ business }) {
       const url = window.URL.createObjectURL(blob);
       const a = document.createElement('a');
       a.href = url;
-      a.setAttribute('download', (fileName || 'pitch.pdf').replace(/[^\w.\-]+/g, '_'));
+      a.setAttribute('download', (fileName || 'pitch.pdf').replace(/[^\w.-]+/g, '_'));
       document.body.appendChild(a);
       a.click();
       a.remove();

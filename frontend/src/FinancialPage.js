@@ -150,7 +150,6 @@ export default function FinancialPage() {
     if (!data || !Array.isArray(data.monthly) || data.monthly.length === 0) return null;
     const width = 760, height = 220, pad = 28;
     const months = data.monthly;
-    const xs = months.map((m, i) => i);
     const maxRevenue = Math.max(
       1,
       ...months.map(m => Math.max(m.revenue_expected || 0, m.revenue_best || 0, m.revenue_worst || 0))

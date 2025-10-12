@@ -14,7 +14,6 @@ import AdminDashboard from "./AdminDashboard";
 import HealthPage from "./HealthPage";
 
 import PitchDeckPage from "./PitchDeckPage";
-import FeatureFlags from "./FeatureFlags";
 import MarketingPage from "./MarketingPage";
 import SettingsPage from "./SettingsPage";
 import VendorsPage from "./VendorsPage";
@@ -23,8 +22,6 @@ import AgentsPage from "./AgentsPage";
 import MemoryPage from "./MemoryPage";
 
 // ----------------------------- Utilities & Mock Data ----------------------------------
-export const inr = new Intl.NumberFormat("en-IN", { style: "currency", currency: "INR", maximumFractionDigits: 0 });
-const currency = (n) => inr.format(n);
 const nowISO = () => new Date().toISOString();
 const ago = (mins) => new Date(Date.now() - mins * 60 * 1000).toISOString();
 const genId = (prefix = "id") => `${prefix}_${Math.random().toString(36).slice(2, 9)}`;
@@ -141,7 +138,6 @@ export default function BizpanionApp() {
 
   useEffect(() => saveState({ ...state, activeBizId }), [state, activeBizId]);
 
-  const [sidebarOpen, setSidebarOpen] = useState(false);
   const [view, setView] = useState("dashboard");
   const [chatOpen, setChatOpen] = useState(false);
   const [darkMode, setDarkMode] = useState(() => {
@@ -256,7 +252,7 @@ export default function BizpanionApp() {
       setLocale(user.locale);
       localStorage.setItem('locale', user.locale);
     }
-  }, [user]);
+  }, [user, locale]);
 
   const formatCurrency = (n) =>
     new Intl.NumberFormat(locale || 'en-IN', { style: 'currency', currency: 'INR', maximumFractionDigits: 0 }).format(n);
