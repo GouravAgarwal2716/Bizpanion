@@ -15,12 +15,29 @@ const limiter = rateLimit({
   max: 100, // limit each IP to 100 requests per windowMs
 });
 app.use(limiter);
+const allowedOrigins = [
+  'http://localhost:3000',
+  'http://127.0.0.1:3000',
+  process.env.FRONTEND_ORIGIN,                          // e.g. https://your-app.vercel.app
+  process.env.VERCEL_URL && `https://${process.env.VERCEL_URL}` // Vercel provides this env in some setups
+].filter(Boolean);
+
 const corsOptions = {
-  origin: ['http://localhost:3000', 'http://127.0.0.1:3000'],
+  origin: (origin, callback) => {
+    // Allow non-browser or same-origin requests with no origin header
+    if (!origin) return callback(null, true);
+
+    const isAllowed =
+      allowedOrigins.includes(origin) ||
+      /\.vercel\.app$/.test(origin); // allow any Vercel deployment domains
+
+    return callback(isAllowed ? null : new Error('Not allowed by CORS'), isAllowed);
+  },
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization']
 };
+
 app.use(cors(corsOptions));
 // Handle CORS preflight for all routes
 app.options(/.*/, cors(corsOptions));

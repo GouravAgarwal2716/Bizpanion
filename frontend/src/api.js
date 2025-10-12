@@ -1,7 +1,17 @@
 import axios from 'axios';
 
-// Use the environment variable for the API base URL
-const API_BASE = process.env.REACT_APP_API_BASE || 'http://localhost:5000';
+/**
+ * API base URL resolution order:
+ * 1) REACT_APP_API (preferred)
+ * 2) REACT_APP_API_BASE (legacy)
+ * 3) window.ENV.API_BASE (optional runtime injection)
+ * 4) localhost fallback (dev)
+ */
+const API_BASE =
+  process.env.REACT_APP_API ||
+  process.env.REACT_APP_API_BASE ||
+  (typeof window !== 'undefined' && window.ENV && window.ENV.API_BASE) ||
+  'http://localhost:5000';
 
 export const api = axios.create({
   baseURL: API_BASE,
