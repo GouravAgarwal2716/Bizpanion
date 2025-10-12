@@ -39,5 +39,23 @@ function createOpenAIClient(apiKey) {
   };
 }
 
-const defaultClient = createOpenAIClient(process.env.OPENAI_API_KEY);
-module.exports = { createOpenAIClient, ...defaultClient };
+const hasKey = !!process.env.OPENAI_API_KEY;
+
+// Avoid crashing app at startup if OPENAI_API_KEY is missing on the host.
+// When missing, export stub methods that throw a clear runtime error instead.
+const defaultClient = hasKey
+  ? createOpenAIClient(process.env.OPENAI_API_KEY)
+  : {
+      client: null,
+      async chatCompletion() {
+        throw new Error('OPENAI_API_KEY not configured on the server. Set it in Render → Backend → Environment.');
+      },
+      async embeddingsCreate() {
+        throw new Error('OPENAI_API_KEY not configured on the server. Set it in Render → Backend → Environment.');
+      },
+      async responsesCreate() {
+        throw new Error('OPENAI_API_KEY not configured on the server. Set it in Render → Backend → Environment.');
+      }
+    };
+
+module.exports = { createOpenAIClient, hasKey, ...defaultClient };
