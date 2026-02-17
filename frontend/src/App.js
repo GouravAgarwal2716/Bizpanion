@@ -3,24 +3,13 @@ import "./BizpanionApp.css";
 import "./UXPolish.css";
 import { api } from "./api";
 import AuthForm from "./AuthForm";
-import ConnectionsPage from "./ConnectionsPage";
-import DocumentsPage from "./DocumentsPage";
 import TasksPage from "./TasksPage";
 import LandingPage from "./LandingPage";
 import HeroSection from "./components/HeroSection";
 import ShopGrid from "./components/ShopGrid";
-import InsightsPage from "./InsightsPage";
-import FinancialPage from "./FinancialPage";
-import AdminDashboard from "./AdminDashboard";
-import HealthPage from "./HealthPage";
-
-import PitchDeckPage from "./PitchDeckPage";
 import MarketingPage from "./MarketingPage";
 import SettingsPage from "./SettingsPage";
-import VendorsPage from "./VendorsPage";
-import BrandDesignerPage from "./BrandDesignerPage";
-import AgentsPage from "./AgentsPage";
-import MemoryPage from "./MemoryPage";
+
 
 
 // ----------------------------- Utilities & Mock Data ----------------------------------
