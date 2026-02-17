@@ -111,10 +111,13 @@ If you use the Live Business Analytics data, mention it. For example: "Based on 
     const rawResponse = completion.choices[0].message.content;
     let aiResponse, action = null;
     try {
-      const parsed = JSON.parse(rawResponse);
+      // Clean up markdown code blocks if present (Gemini often adds them)
+      const cleanJson = rawResponse.replace(/```json/g, '').replace(/```/g, '').trim();
+      const parsed = JSON.parse(cleanJson);
       aiResponse = parsed.speakable_response;
       action = parsed.action || null;
     } catch (e) {
+      console.warn("JSON Parse Failed on AI response:", rawResponse);
       aiResponse = rawResponse; // Fallback to raw text if JSON parsing fails
     }
 
