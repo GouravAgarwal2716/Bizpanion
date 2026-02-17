@@ -19,16 +19,28 @@ export default function AuthForm({ onAuth }) {
     setError("");
     setLoading(true);
     try {
+
+
       let res;
+      // Show "Waking up server" message if request takes > 2s
+      const wakeUpTimer = setTimeout(() => {
+        if (loading) setError("Waking up server (this may take 1-2 mins on free tier)...");
+      }, 2000);
+
       if (isLogin) {
         res = await api.post("/auth/login", { email, password });
       } else {
         res = await api.post("/auth/register", { name, email, password, businessName, industry, locale, role });
       }
+      clearTimeout(wakeUpTimer);
       localStorage.setItem("token", res.data.token);
       onAuth && onAuth(res.data.user);
     } catch (err) {
-      setError(err.response?.data?.error || "Authentication failed");
+      console.error(err);
+      setError(
+        err.response?.data?.error ||
+        (err.code === "ECONNABORTED" ? "Server timeout. Please try again." : "Authentication failed")
+      );
     }
     setLoading(false);
   }

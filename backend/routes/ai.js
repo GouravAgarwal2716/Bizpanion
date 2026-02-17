@@ -423,4 +423,38 @@ Constraints:
   }
 });
 
+// AI Assistant
+router.post('/assistant', auth, async (req, res) => {
+  try {
+    const { message } = req.body;
+
+    if (!message) {
+      return res.status(400).json({ error: 'Message is required' });
+    }
+
+    const prompt = `
+You are a helpful AI assistant for a business owner.
+The user said: "${message}"
+Respond in a helpful and friendly tone.
+`;
+
+    const completion = await chatCompletion({
+      model: "gpt-4o",
+      messages: [
+        { role: "system", content: "You are a helpful AI assistant for a business owner." },
+        { role: "user", content: message }
+      ],
+      max_tokens: 150,
+      temperature: 0.7,
+    });
+
+    const response = completion.choices[0].message.content;
+    res.json({ response });
+
+  } catch (error) {
+    console.error('Error with AI assistant:', error);
+    res.status(500).json({ error: 'Failed to get response from AI assistant' });
+  }
+});
+
 module.exports = router;

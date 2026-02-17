@@ -21,6 +21,7 @@ import BrandDesignerPage from "./BrandDesignerPage";
 import AgentsPage from "./AgentsPage";
 import MemoryPage from "./MemoryPage";
 
+
 // ----------------------------- Utilities & Mock Data ----------------------------------
 const nowISO = () => new Date().toISOString();
 const ago = (mins) => new Date(Date.now() - mins * 60 * 1000).toISOString();
@@ -269,13 +270,13 @@ export default function BizpanionApp() {
           setTimeout(() => {
             setNotifications((prev) => prev.slice(1));
           }, 7000);
-        } catch {}
+        } catch { }
       };
       es.onerror = () => {
         es.close();
       };
       return () => es.close();
-    } catch {}
+    } catch { }
   }, []);
 
   useEffect(() => {
@@ -287,7 +288,7 @@ export default function BizpanionApp() {
       localStorage.setItem('lastStatsPopup', today);
     }
   }, []);
-  
+
   // Global event: open Marketing from anywhere (e.g., Agents page or Chat CTA)
   useEffect(() => {
     const handler = () => setView('marketing');
@@ -299,7 +300,7 @@ export default function BizpanionApp() {
     const tm = setTimeout(() => setShowSplash(false), 2500);
     return () => clearTimeout(tm);
   }, []);
-  
+
 
   function updateActive(updater) {
     setState((s) => ({
@@ -332,7 +333,7 @@ export default function BizpanionApp() {
   useEffect(() => {
     const theme = darkMode ? 'dark' : 'light';
     document.documentElement.setAttribute('data-theme', theme);
-    try { localStorage.setItem('theme', theme); } catch {}
+    try { localStorage.setItem('theme', theme); } catch { }
   }, [darkMode]);
 
   if (!user) {
@@ -351,9 +352,9 @@ export default function BizpanionApp() {
           </div>
         </div>
       )}
-      
+
       {showPersonaModal && (
-        <div className="modal-overlay" onClick={() => {}}>
+        <div className="modal-overlay" onClick={() => { }}>
           <div className="modal-content" onClick={(e) => e.stopPropagation()}>
             <div className="modal-header">
               <h3>Choose your Business Type</h3>
@@ -427,9 +428,9 @@ export default function BizpanionApp() {
           </div>
         </>
       )}
-            {/* Mobile Sidebar Overlay */}
-            {mobileSidebarOpen && (
-        <div 
+      {/* Mobile Sidebar Overlay */}
+      {mobileSidebarOpen && (
+        <div
           className="mobile-sidebar-overlay active"
           onClick={() => setMobileSidebarOpen(false)}
         />
@@ -630,7 +631,7 @@ export default function BizpanionApp() {
                 localStorage.setItem('locale', val);
                 try {
                   await api.put('/auth/update', { locale: val });
-                } catch {}
+                } catch { }
               }}
               style={{ marginLeft: '0.5rem' }}
             >
@@ -667,7 +668,7 @@ export default function BizpanionApp() {
           {view === "insights" && <InsightsPage />}
           {view === "admin" && user?.role === 'admin' && <AdminDashboard />}
           {view === "pitch" && <PitchDeckPage business={active} />}
-          
+
           {view === "settings" && <SettingsPage darkMode={darkMode} setDarkMode={toggleDarkMode} setView={setView} />}
         </main>
       </div>
@@ -705,6 +706,7 @@ export default function BizpanionApp() {
 
       {/* Chat Dock */}
       {chatOpen && <ChatDock business={active} t={t} locale={locale} setView={setView} />}
+
     </div>
   );
 }
@@ -729,14 +731,14 @@ function Dashboard({ business, setView, formatCurrency, t, persona }) {
   useEffect(() => {
     api.get('/analytics/summary')
       .then(res => setSummary(res.data))
-      .catch(() => {});
+      .catch(() => { });
   }, []);
 
   useEffect(() => {
     const qs = persona ? `?persona=${encodeURIComponent(persona)}&refresh=1` : '?refresh=1';
     api.get(`/analytics/summary-text${qs}`)
       .then(res => setSummaryText(res.data?.summary || ''))
-      .catch(() => {});
+      .catch(() => { });
   }, [persona]);
 
 
@@ -1355,7 +1357,7 @@ function GrowthHub({ business, onApply }) {
   useEffect(() => {
     api.post("/growth/generate", { business })
       .then(res => setPlan(res.data.map(step => ({ ...step, id: genId("gh"), done: false }))))
-      .catch(() => {});
+      .catch(() => { });
   }, [business]);
 
   function toggle(id) {
@@ -1582,52 +1584,52 @@ function ChatDock({ business, t, locale, setView }) {
                 <div>{m.text}</div>
               </div>
               {m.role === "ai" && m.citations && Array.isArray(m.citations) && m.citations.length > 0 && (
-              <div style={{ marginTop: '0.5rem', fontSize: '0.8rem', color: 'var(--text-secondary)' }}>
-                Sources: {m.citations.map((c, idx) => `Doc ${c.doc_id}, chunk ${c.chunk_index}`).join('; ')}
-              </div>
-            )}
-            {m.role === "ai" && m.text && (
-          <div className="chat-actions-bar">
-                <button className="edit-btn" onClick={() => addTaskFromMessage(i)}>{t("+ Add as Task")}</button>
-                <button
-                  className="edit-btn"
-                  onClick={async () => {
-                    try {
-                      await api.post('/analytics/insights', { text: m?.text || '' });
-                      window.alert(t('Saved as Insight.'));
-                    } catch (e) {
-                      window.alert(t('Failed to save insight.'));
-                    }
-                  }}
-                >
-                  {t("Save as Insight")}
-                </button>
-                {m.action && (
-                  <button className="apply-btn" onClick={() => executeAction(m.action)}>
-                    {m.action.type === 'send_email' ? '✉️ Send Email' : '🚀 Post to Social'}
-                  </button>
-                )}
-                {/campaign/i.test(m.text || '') && (
+                <div style={{ marginTop: '0.5rem', fontSize: '0.8rem', color: 'var(--text-secondary)' }}>
+                  Sources: {m.citations.map((c, idx) => `Doc ${c.doc_id}, chunk ${c.chunk_index}`).join('; ')}
+                </div>
+              )}
+              {m.role === "ai" && m.text && (
+                <div className="chat-actions-bar">
+                  <button className="edit-btn" onClick={() => addTaskFromMessage(i)}>{t("+ Add as Task")}</button>
                   <button
-                    className="apply-btn"
-                    onClick={() => {
+                    className="edit-btn"
+                    onClick={async () => {
                       try {
-                        const prefill = {
-                          businessType: 'Retail/E-commerce',
-                          targetAudience: 'Existing customers',
-                          tone: 'Friendly',
-                          contentType: 'Ad Copy'
-                        };
-                        localStorage.setItem('marketing_prefill', JSON.stringify(prefill));
-                      } catch {}
-                      setView && setView('marketing');
+                        await api.post('/analytics/insights', { text: m?.text || '' });
+                        window.alert(t('Saved as Insight.'));
+                      } catch (e) {
+                        window.alert(t('Failed to save insight.'));
+                      }
                     }}
                   >
-                    → Create Marketing Campaign
+                    {t("Save as Insight")}
                   </button>
-                )}
-                <button className="speak-btn" onClick={() => speak(m.text)}>🔊</button>
-              </div>
+                  {m.action && (
+                    <button className="apply-btn" onClick={() => executeAction(m.action)}>
+                      {m.action.type === 'send_email' ? '✉️ Send Email' : '🚀 Post to Social'}
+                    </button>
+                  )}
+                  {/campaign/i.test(m.text || '') && (
+                    <button
+                      className="apply-btn"
+                      onClick={() => {
+                        try {
+                          const prefill = {
+                            businessType: 'Retail/E-commerce',
+                            targetAudience: 'Existing customers',
+                            tone: 'Friendly',
+                            contentType: 'Ad Copy'
+                          };
+                          localStorage.setItem('marketing_prefill', JSON.stringify(prefill));
+                        } catch { }
+                        setView && setView('marketing');
+                      }}
+                    >
+                      → Create Marketing Campaign
+                    </button>
+                  )}
+                  <button className="speak-btn" onClick={() => speak(m.text)}>🔊</button>
+                </div>
               )}
             </div>
           );

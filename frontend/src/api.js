@@ -15,7 +15,7 @@ const API_BASE =
 
 export const api = axios.create({
   baseURL: API_BASE,
-  timeout: 30000,
+  timeout: 120000,
 });
 
 // Optional: Attach token automatically to every request if present
