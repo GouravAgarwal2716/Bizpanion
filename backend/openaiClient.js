@@ -75,7 +75,8 @@ function createOpenAIWrapper(apiKey) {
 // ------------------------------------------------------------------
 function createGeminiWrapper(apiKey) {
   const genAI = new GoogleGenerativeAI(apiKey);
-  const modelWeb = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
+  // Use 'gemini-flash-latest' which is confirmed working for this key
+  const modelWeb = genAI.getGenerativeModel({ model: "gemini-flash-latest" });
   const modelEmbed = genAI.getGenerativeModel({ model: "text-embedding-004" });
 
   return {
