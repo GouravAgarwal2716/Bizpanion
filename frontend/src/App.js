@@ -336,8 +336,19 @@ export default function BizpanionApp() {
     try { localStorage.setItem('theme', theme); } catch { }
   }, [darkMode]);
 
+  const handleAuthSuccess = (userData) => {
+    setUser(userData);
+    if (userData.locale) setLocale(userData.locale);
+    setShowLanding(false);
+  };
+
+  // Render Landing Page if not logged in and showLanding is true
+  if (showLanding && !user) {
+    return <LandingPage onGetStarted={() => setShowLanding(false)} />;
+  }
+
   if (!user) {
-    return <AuthForm onAuth={setUser} />;
+    return <AuthForm onAuth={handleAuthSuccess} />;
   }
 
   return (
@@ -453,27 +464,6 @@ export default function BizpanionApp() {
             onClick={() => { setView("dashboard"); setMobileSidebarOpen(false); }}
           />
 
-          {/* Analytics */}
-          <div className="nav-section-label" style={{ padding: '0.25rem 0.5rem', color: 'var(--text-tertiary)', fontSize: 12 }}>Analytics</div>
-          <NavItem
-            icon="🩺"
-            label={t("Health")}
-            active={view === "health"}
-            onClick={() => { setView("health"); setMobileSidebarOpen(false); }}
-          />
-          <NavItem
-            icon="🕒"
-            label={t("Memory")}
-            active={view === "memory"}
-            onClick={() => { setView("memory"); setMobileSidebarOpen(false); }}
-          />
-          <NavItem
-            icon="💡"
-            label={t("Insights")}
-            active={view === "insights"}
-            onClick={() => { setView("insights"); setMobileSidebarOpen(false); }}
-          />
-
           {/* Growth & Planning */}
           <div className="nav-section-label" style={{ padding: '0.25rem 0.5rem', color: 'var(--text-tertiary)', fontSize: 12 }}>Growth & Planning</div>
           <NavItem
@@ -481,18 +471,6 @@ export default function BizpanionApp() {
             label={t("Growth Hub")}
             active={view === "growth"}
             onClick={() => { setView("growth"); setMobileSidebarOpen(false); }}
-          />
-          <NavItem
-            icon="🧠"
-            label={t("Agents")}
-            active={view === "agents"}
-            onClick={() => { setView("agents"); setMobileSidebarOpen(false); }}
-          />
-          <NavItem
-            icon="📊"
-            label={t("Pitch Deck")}
-            active={view === "pitch"}
-            onClick={() => { setView("pitch"); setMobileSidebarOpen(false); }}
           />
 
           {/* Operations */}
@@ -509,33 +487,9 @@ export default function BizpanionApp() {
             active={view === "marketing"}
             onClick={() => { setView("marketing"); setMobileSidebarOpen(false); }}
           />
-          <NavItem
-            icon="🤝"
-            label={t("Vendor Connect")}
-            active={view === "vendors"}
-            onClick={() => { setView("vendors"); setMobileSidebarOpen(false); }}
-          />
-          <NavItem
-            icon="📚"
-            label={t("Documents")}
-            active={view === "documents"}
-            onClick={() => { setView("documents"); setMobileSidebarOpen(false); }}
-          />
-          <NavItem
-            icon="🔗"
-            label={t("Connections")}
-            active={view === "connections"}
-            onClick={() => { setView("connections"); setMobileSidebarOpen(false); }}
-          />
 
           {/* Design & Build */}
           <div className="nav-section-label" style={{ padding: '0.25rem 0.5rem', color: 'var(--text-tertiary)', fontSize: 12 }}>Design & Build</div>
-          <NavItem
-            icon="🎨"
-            label={t("Brand Designer")}
-            active={view === "brand"}
-            onClick={() => { setView("brand"); setMobileSidebarOpen(false); }}
-          />
           <NavItem
             icon="🧱"
             label={t("Website Builder")}
@@ -543,24 +497,7 @@ export default function BizpanionApp() {
             onClick={() => { setView("builder"); setMobileSidebarOpen(false); }}
           />
 
-          {/* Finance */}
-          <div className="nav-section-label" style={{ padding: '0.25rem 0.5rem', color: 'var(--text-tertiary)', fontSize: 12 }}>Finance</div>
-          <NavItem
-            icon="📈"
-            label={t("Financial Advisor")}
-            active={view === "financials"}
-            onClick={() => { setView("financials"); setMobileSidebarOpen(false); }}
-          />
-
           {/* Admin & Settings */}
-          {user?.role === 'admin' && (
-            <NavItem
-              icon="🛡️"
-              label={t("Admin")}
-              active={view === 'admin'}
-              onClick={() => { setView('admin'); setMobileSidebarOpen(false); }}
-            />
-          )}
           <NavItem
             icon="⚙️"
             label={t("Settings")}
@@ -618,6 +555,7 @@ export default function BizpanionApp() {
               onClick={() => {
                 localStorage.removeItem("token");
                 setUser(null);
+                setShowLanding(true); // Back to landing on logout
               }}
             >
               {t("Logout")}
@@ -655,20 +593,8 @@ export default function BizpanionApp() {
           {view === "growth" && (
             <GrowthHub business={active} onApply={updateActive} />
           )}
-          {view === "health" && <HealthPage />}
-          {view === "financials" && <FinancialPage />}
-          {view === "marketing" && <MarketingPage />}
-          {view === "brand" && <BrandDesignerPage />}
-          {view === "agents" && <AgentsPage />}
-          {view === "memory" && <MemoryPage />}
           {view === "tasks" && <TasksPage />}
-          {view === "connections" && <ConnectionsPage />}
-          {view === "vendors" && <VendorsPage />}
-          {view === "documents" && <DocumentsPage />}
-          {view === "insights" && <InsightsPage />}
-          {view === "admin" && user?.role === 'admin' && <AdminDashboard />}
-          {view === "pitch" && <PitchDeckPage business={active} />}
-
+          {view === "marketing" && <MarketingPage />}
           {view === "settings" && <SettingsPage darkMode={darkMode} setDarkMode={toggleDarkMode} setView={setView} />}
         </main>
       </div>
