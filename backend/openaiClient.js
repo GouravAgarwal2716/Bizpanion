@@ -151,46 +151,64 @@ function createMockWrapper() {
   return {
     provider: 'mock',
     async chatCompletion({ messages }) {
-      const lastMsg = messages[messages.length - 1].content.toLowerCase();
-      let reply = "";
+      // 1. Analyze context to determine what kind of mock response to send
+      const allText = messages.map(m => m.content).join('\n').toLowerCase();
+      const isMarketing = allText.includes('marketing') || allText.includes('ad copy') || allText.includes('post');
+      const isIdeas = allText.includes('business ideas') || allText.includes('startup ideas');
+      const isPlan = allText.includes('business plan');
+      const isChat = allText.includes('speakable_response') || allText.includes('bizpanion'); // System prompt has these keywords
 
-      // Smart pattern matching for demo
-      if (lastMsg.includes('revenue') || lastMsg.includes('sales')) {
-        reply = JSON.stringify({
-          speakable_response: "Based on your live analytics, your revenue for the last 30 days is ₹1,82,450. This is a 12.5% increase from last month. Great job!",
-          action: null
-        });
-      } else if (lastMsg.includes('profit')) {
-        reply = JSON.stringify({
-          speakable_response: "Your net profit is ₹45,300, which is a healthy margin. However, it dipped slightly (-2.1%) due to increased marketing spend.",
-          action: null
-        });
-      } else if (lastMsg.includes('growth') || lastMsg.includes('plan')) {
-        reply = JSON.stringify({
-          speakable_response: "I've analyzed your data. Your best growth opportunity is to optimize your Instagram Ads, as CAC has risen. I also recommend a 'Comeback Coupon' for dormant customers.",
-          action: "open_growth_hub"
-        });
-      } else if (lastMsg.includes('website') || lastMsg.includes('design')) {
-        reply = JSON.stringify({
-          speakable_response: "I can help you build your website. Go to the Website Builder tab to start generating a landing page for 'Priya's Apparel'.",
-          action: "navigate_website_builder"
-        });
-      } else if (lastMsg.includes('hindi') || lastMsg.includes('namaste')) {
-        reply = JSON.stringify({
-          speakable_response: "Namaste! Aapka vyapaar kaisa chal raha hai? Main aapki madad revenue badhane mein kar sakta hoon.",
-          action: null
+      let replyContent = "";
+
+      if (isMarketing) {
+        // Return plain text for Marketing
+        replyContent = "🚀 Elevate your style with Priya's Apparel! \n\nHandcrafted with love, sustainable by choice. Discover our new collection of ethnic wear that blends tradition with modern comfort. \n\nShop now: [Link]\n#EthicalFashion #Handmade #PriyasApparel";
+      } else if (isIdeas) {
+        // Return JSON for Business Ideas
+        replyContent = JSON.stringify({
+          ideas: [
+            {
+              name: "EcoStyle Rentals",
+              tagline: "Fashion that doesn't cost the earth",
+              description: "A premium clothing rental service focusing on sustainable and ethnic wear for special occasions.",
+              investment: "₹2,00,000 - ₹5,00,000",
+              potential: "High",
+              target: "Young professionals attending weddings and events",
+              insights: ["Growing rental market", "Sustainability trend", "High margins"],
+              trend: "Sustainable Fashion"
+            }
+          ]
         });
       } else {
-        reply = JSON.stringify({
-          speakable_response: "I am in Demo Mode because no API key was provided. I can simulate answers about Revenue, Profit, Growth, or Website building. Try asking: 'What is my revenue?'",
-          action: null
+        // Default to Chat JSON format (since Chat is the primary complex user)
+        const lastMsg = messages[messages.length - 1].content.toLowerCase();
+        let speakable = "I am in Demo Mode. I can simulate answers about Revenue, Profit, or Growth.";
+        let action = null;
+
+        if (lastMsg.includes('revenue') || lastMsg.includes('sales')) {
+          speakable = "Based on your live analytics, your revenue for the last 30 days is ₹1,82,450. This is a 12.5% increase from last month. Great job!";
+        } else if (lastMsg.includes('profit')) {
+          speakable = "Your net profit is ₹45,300, which is a healthy margin. However, it dipped slightly (-2.1%) due to increased marketing spend.";
+        } else if (lastMsg.includes('growth') || lastMsg.includes('plan')) {
+          speakable = "I've analyzed your data. Your best growth opportunity is to optimize your Instagram Ads, as CAC has risen.";
+          action = "open_growth_hub";
+        } else if (lastMsg.includes('website')) {
+          speakable = "I can help you build your website. Go to the Website Builder tab to start generating a landing page.";
+          action = "navigate_website_builder";
+        } else if (lastMsg.includes('hi') || lastMsg.includes('hello')) {
+          speakable = "Hello! I am Bizpanion (Demo Mode). Ask me about your business performance!";
+        }
+
+        replyContent = JSON.stringify({
+          speakable_response: speakable,
+          action: action
         });
       }
 
       return {
         choices: [{
           message: {
-            content: reply,
+            content: replyContent,
             role: 'assistant'
           }
         }]
