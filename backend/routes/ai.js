@@ -66,9 +66,10 @@ Focus on ideas that are:
     });
 
     const response = completion.choices[0].message.content;
-    
+
     try {
-      const ideas = JSON.parse(response);
+      const cleanJson = response.replace(/```json/g, '').replace(/```/g, '').trim();
+      const ideas = JSON.parse(cleanJson);
       res.json(ideas);
     } catch (parseError) {
       // Fallback if JSON parsing fails
@@ -102,11 +103,11 @@ Focus on ideas that are:
 router.post('/save-idea', auth, async (req, res) => {
   try {
     const { name, tagline, description, investment, potential, target, insights, trend } = req.body;
-    
+
     // Here you would save to database
     // For now, just return success
-    res.json({ 
-      success: true, 
+    res.json({
+      success: true,
       message: 'Idea saved successfully',
       idea: {
         id: Date.now(),
@@ -209,10 +210,13 @@ Make it compelling and actionable.
     });
 
     const content = completion.choices[0].message.content;
+    // Gemini often wraps properly but let's be safe if we asked for JSON (we didn't here, but good practice to clean if needed)
+    // For marketing content, it's just text, so no JSON parse needed unless we change prompt.
+    // BUT the 'marketing' route returns { content: string }, so we just send the text.
 
     res.json({
       success: true,
-      content: content
+      content: content.replace(/```html/g, '').replace(/```/g, '').trim() // Clean potential markdown
     });
 
   } catch (error) {
@@ -323,7 +327,9 @@ Rules:
 
     let data;
     try {
-      data = JSON.parse(completion.choices?.[0]?.message?.content || "{}");
+      const raw = completion.choices?.[0]?.message?.content || "{}";
+      const clean = raw.replace(/```json/g, '').replace(/```/g, '').trim();
+      data = JSON.parse(clean);
     } catch {
       // Fallback: synthesize a simple 6-month projection if JSON parsing fails
       const today = new Date();
@@ -408,7 +414,9 @@ Constraints:
 
     let data = {};
     try {
-      data = JSON.parse(completion.choices?.[0]?.message?.content || '{}');
+      const raw = completion.choices?.[0]?.message?.content || '{}';
+      const clean = raw.replace(/```json/g, '').replace(/```/g, '').trim();
+      data = JSON.parse(clean);
     } catch {
       data = {
         subject: `${purpose || 'Quick follow-up'} — ${vendorName || 'Vendor'}`,

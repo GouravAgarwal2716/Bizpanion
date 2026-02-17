@@ -3,6 +3,8 @@ import "./BizpanionApp.css";
 import "./UXPolish.css";
 import { api } from "./api";
 import AuthForm from "./AuthForm";
+import ConnectionsPage from "./ConnectionsPage";
+import DocumentsPage from "./DocumentsPage";
 import TasksPage from "./TasksPage";
 import LandingPage from "./LandingPage";
 import HeroSection from "./components/HeroSection";
@@ -487,6 +489,21 @@ export default function BizpanionApp() {
             active={view === "builder"}
             onClick={() => { setView("builder"); setMobileSidebarOpen(false); }}
           />
+          <NavItem
+            icon="🔌"
+            label={t("Connections")}
+            active={view === "connections"}
+            onClick={() => { setView("connections"); setMobileSidebarOpen(false); }}
+          />
+
+          {/* Tools */}
+          <div className="nav-section-label" style={{ padding: '0.25rem 0.5rem', color: 'var(--text-tertiary)', fontSize: 12 }}>Tools</div>
+          <NavItem
+            icon="📄"
+            label={t("Documents")}
+            active={view === "documents"}
+            onClick={() => { setView("documents"); setMobileSidebarOpen(false); }}
+          />
 
           {/* Admin & Settings */}
           <NavItem
@@ -586,6 +603,8 @@ export default function BizpanionApp() {
           )}
           {view === "tasks" && <TasksPage />}
           {view === "marketing" && <MarketingPage />}
+          {view === "connections" && <ConnectionsPage />}
+          {view === "documents" && <DocumentsPage />}
           {view === "settings" && <SettingsPage darkMode={darkMode} setDarkMode={toggleDarkMode} setView={setView} />}
         </main>
       </div>
