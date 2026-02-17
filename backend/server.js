@@ -69,6 +69,7 @@ const agentsRoutes = require('./routes/agents');
 const alertsRoutes = require('./routes/alerts');
 const auditRoutes = require('./routes/audit');
 const schedulerRoutes = require('./routes/scheduler');
+const aiRoutes = require('./routes/ai');
 const { startScheduler } = require('./utils/scheduler');
 
 
@@ -95,6 +96,7 @@ app.use('/agents', agentsRoutes);
 app.use('/alerts', alertsRoutes);
 app.use('/audit', auditRoutes);
 app.use('/scheduler', schedulerRoutes);
+app.use('/ai', aiRoutes);
 
 startScheduler();
 
