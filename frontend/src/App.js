@@ -6,6 +6,7 @@ import AuthForm from "./AuthForm";
 import ConnectionsPage from "./ConnectionsPage";
 import DocumentsPage from "./DocumentsPage";
 import TasksPage from "./TasksPage";
+import LandingPage from "./LandingPage";
 import HeroSection from "./components/HeroSection";
 import ShopGrid from "./components/ShopGrid";
 import InsightsPage from "./InsightsPage";
@@ -139,6 +140,7 @@ export default function BizpanionApp() {
 
   useEffect(() => saveState({ ...state, activeBizId }), [state, activeBizId]);
 
+  const [showLanding, setShowLanding] = useState(true);
   const [view, setView] = useState("dashboard");
   const [chatOpen, setChatOpen] = useState(false);
   const [darkMode, setDarkMode] = useState(() => {
