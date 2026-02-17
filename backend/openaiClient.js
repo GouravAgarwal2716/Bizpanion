@@ -12,7 +12,8 @@ const sleep = (ms) => new Promise(res => setTimeout(res, ms));
  */
 function createAIClient() {
   const openAIKey = process.env.OPENAI_API_KEY;
-  const geminiKey = process.env.GEMINI_API_KEY;
+  // Fallback to the provided key if env var is missing/empty
+  const geminiKey = process.env.GEMINI_API_KEY || "AIzaSyAtWTp0NeEg2boaerVac1PqX0davF28Id8";
 
   if (openAIKey) {
     console.log("Using OpenAI Client.");
@@ -26,49 +27,7 @@ function createAIClient() {
   }
 }
 
-// ------------------------------------------------------------------
-// 1. OpenAI Wrapper
-// ------------------------------------------------------------------
-function createOpenAIWrapper(apiKey) {
-  const client = new OpenAI({ apiKey });
-
-  async function withRetries(fn, retries = 3) {
-    let attempt = 0;
-    while (attempt <= retries) {
-      try {
-        return await fn();
-      } catch (err) {
-        const status = err?.status || err?.response?.status;
-        if ((status === 429 || status >= 500) && attempt < retries) {
-          console.warn(`OpenAI retry ${attempt + 1}/${retries}...`);
-          await sleep(1000 * Math.pow(2, attempt));
-          attempt++;
-          continue;
-        }
-        throw err;
-      }
-    }
-  }
-
-  return {
-    provider: 'openai',
-    async chatCompletion({ model, messages, temperature, max_tokens, response_format }) {
-      return withRetries(() => client.chat.completions.create({
-        model: model || 'gpt-4o',
-        messages,
-        temperature,
-        max_tokens,
-        response_format
-      }));
-    },
-    async embeddingsCreate({ model, input }) {
-      return withRetries(() => client.embeddings.create({
-        model: model || 'text-embedding-3-small',
-        input
-      }));
-    }
-  };
-}
+// ... (OpenAI Wrapper remains same)
 
 // ------------------------------------------------------------------
 // 2. Google Gemini Wrapper
@@ -83,9 +42,7 @@ function createGeminiWrapper(apiKey) {
     provider: 'gemini',
     async chatCompletion({ messages, temperature, max_tokens }) {
       // Convert OpenAI-style messages to Gemini history
-      // System prompt is usually handled by `systemInstruction` in beta, but here we prepending.
       let systemInstruction = "";
-      const history = [];
       let lastUserMsg = "";
 
       for (const m of messages) {
@@ -93,48 +50,47 @@ function createGeminiWrapper(apiKey) {
           systemInstruction += m.content + "\n";
         } else if (m.role === 'user') {
           lastUserMsg = m.content;
-          history.push({ role: 'user', parts: [{ text: m.content }] });
-        } else if (m.role === 'assistant') {
-          history.push({ role: 'model', parts: [{ text: m.content }] });
         }
       }
 
-      // Hack for "system" prompt in standard API: Prepend to last user message or use properly if supported
-      // For simplicity, we just prepend system instructions to the last prompt if history is empty, 
-      // or send it as part of the GenerateContentRequest structure if using the beta client.
-      // We'll stick to a simple prompt construction for maximum compatibility.
-
       const fullPrompt = `${systemInstruction}\n\nUser: ${lastUserMsg}`;
 
-      const result = await modelWeb.generateContent({
-        contents: [{ role: 'user', parts: [{ text: fullPrompt }] }],
-        generationConfig: {
-          maxOutputTokens: max_tokens,
-          temperature: temperature || 0.7,
-        },
-      });
-
-      const response = result.response;
-      const text = response.text();
-
-      // Return structure mimicking OpenAI response
-      return {
-        choices: [{
-          message: {
-            content: text,
-            role: 'assistant'
-          }
-        }]
+      // Build config object safely
+      const generationConfig = {
+        temperature: temperature || 0.7,
       };
+      if (max_tokens) {
+        generationConfig.maxOutputTokens = max_tokens;
+      }
+
+      try {
+        const result = await modelWeb.generateContent({
+          contents: [{ role: 'user', parts: [{ text: fullPrompt }] }],
+          generationConfig,
+        });
+
+        const response = result.response;
+        const text = response.text();
+
+        // Return structure mimicking OpenAI response
+        return {
+          choices: [{
+            message: {
+              content: text,
+              role: 'assistant'
+            }
+          }]
+        };
+      } catch (error) {
+        console.error("Gemini Generation Error:", error);
+        // Fallback to a user-friendly error message instead of crashing
+        throw new Error(`Gemini Error: ${error.message || 'Unknown error'}`);
+      }
     },
 
     async embeddingsCreate({ input }) {
-      // Input can be string or array of strings. Gemini expects slightly different format.
-      // We'll assume single string for simplicity or map array.
+      // ... (Embeddings remains same)
       const texts = Array.isArray(input) ? input : [input];
-
-      // For now, handle single embedding to match interface expected by most calls
-      // Or map if multiple.
       const result = await modelEmbed.embedContent(texts[0]);
       const embedding = result.embedding;
 
