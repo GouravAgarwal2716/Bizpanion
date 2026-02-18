@@ -5,3 +5,5 @@ python-dotenv
 numpy
 chromadb
 pdfminer.six
+gunicorn
+google-generativeai

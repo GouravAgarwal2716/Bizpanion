@@ -49,6 +49,13 @@ if not openai_client and GEMINI_API_KEY:
     except Exception as e:
         print(f"Failed to init Gemini: {e}")
 
+# Ensure google.generativeai is available for embedding function
+try:
+    import google.generativeai as genai
+except ImportError:
+    genai = None
+    print("google.generativeai module not found. Gemini embeddings will fail.")
+
 EMBEDDING_MODEL = os.environ.get("EMBEDDING_MODEL", "text-embedding-3-small")
 
 def local_hash_embedding(text, dim=768):
@@ -73,9 +80,8 @@ def get_embedding_with_retries(text, retries=3, delay=1):
                 time.sleep(delay * (2 ** (attempt - 1)))
     
     # 2. Gemini Strategy
-    if GEMINI_API_KEY:
+    if GEMINI_API_KEY and genai:
         try:
-            import google.generativeai as genai
             # 'models/text-embedding-004' is a common embedding model
             result = genai.embed_content(
                 model="models/text-embedding-004",
