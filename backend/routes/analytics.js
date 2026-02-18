@@ -1,11 +1,7 @@
 const express = require('express');
 const auth = require('../middlewares/auth');
 const { Connection, Memory, Order, sequelize } = require('../models');
-const { OpenAI } = require('openai');
-const PDFDocument = require('pdfkit');
-const router = express.Router();
-
-const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
+const { chatCompletion } = require('../openaiClient');
 
 async function generateAiInsights(kpis, connections, userId) {
   const connectionStatus = connections.map(c => `${c.name}: ${c.connected ? 'Connected' : 'Not Connected'}`).join(', ');
@@ -30,7 +26,7 @@ async function generateAiInsights(kpis, connections, userId) {
   `;
 
   try {
-    const completion = await openai.chat.completions.create({
+    const completion = await chatCompletion({
       model: "gpt-4o",
       messages: [
         { role: "system", content: "You are an AI business analyst providing actionable insights." },
@@ -228,7 +224,7 @@ router.get('/report', auth, async (req, res) => {
     ];
 
     // AI-generated insights
-    const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
+    // AI-generated insights
     let insights = [];
     try {
       const prompt = `Generate 3 concise business insights given KPIs:
@@ -237,7 +233,7 @@ router.get('/report', auth, async (req, res) => {
       AOV: ${aov} INR, New Customers: ${newCustomers}
       Channels: ${channels.map(c => `${c.label}:${c.value}`).join(', ')}
       `;
-      const completion = await openai.chat.completions.create({
+      const completion = await chatCompletion({
         model: "gpt-4o",
         messages: [
           { role: "system", content: "You are an AI business analyst providing actionable insights." },
@@ -476,11 +472,9 @@ Write ONE short paragraph (1–2 sentences) as a business summary in plain Engli
     `.trim();
 
     // Generate with OpenAI
-    const { OpenAI } = require('openai');
-    const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
     let text = '';
     try {
-      const completion = await openai.chat.completions.create({
+      const completion = await chatCompletion({
         model: 'gpt-4o',
         messages: [
           { role: 'system', content: 'You are a concise business analyst. Return 1 short paragraph only.' },
