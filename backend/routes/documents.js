@@ -5,8 +5,7 @@ const path = require('path');
 const fs = require('fs');
 const auth = require('../middlewares/auth');
 const models = require('../models');
-const { OpenAI } = require('openai');
-const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
+const { chatCompletion } = require('../openaiClient');
 
 const router = express.Router();
 
@@ -25,7 +24,7 @@ const storage = multer.diskStorage({
   }
 });
 
-const upload = multer({ 
+const upload = multer({
   storage: storage,
   fileFilter: (req, file, cb) => {
     // Allow PDF, CSV, and text files
@@ -50,7 +49,7 @@ router.post('/upload', auth, upload.single('document'), async (req, res) => {
 
     const user_id = req.user.id;
     const { title, description } = req.body;
-    
+
     let content = '';
     let processed = false;
 
@@ -101,7 +100,7 @@ router.post('/upload', auth, upload.single('document'), async (req, res) => {
       setTimeout(async () => {
         try {
           const prompt = `Summarize this business document in 3-5 crisp bullet points for future recall:\n\n${content.slice(0, 8000)}`;
-          const completion = await openai.chat.completions.create({
+          const completion = await chatCompletion({
             model: 'gpt-4o',
             messages: [
               { role: 'system', content: 'You create concise business document summaries.' },
@@ -139,12 +138,12 @@ router.post('/upload', auth, upload.single('document'), async (req, res) => {
 
   } catch (error) {
     console.error('Document upload error:', error);
-    
+
     // Clean up uploaded file if database save failed
     if (req.file && fs.existsSync(req.file.path)) {
       fs.unlinkSync(req.file.path);
     }
-    
+
     res.status(500).json({ error: 'Failed to upload document' });
   }
 });
@@ -169,9 +168,9 @@ router.get('/', auth, async (req, res) => {
 router.get('/:id', auth, async (req, res) => {
   try {
     const document = await models.Document.findOne({
-      where: { 
+      where: {
         id: req.params.id,
-        user_id: req.user.id 
+        user_id: req.user.id
       }
     });
 
@@ -190,9 +189,9 @@ router.get('/:id', auth, async (req, res) => {
 router.delete('/:id', auth, async (req, res) => {
   try {
     const document = await models.Document.findOne({
-      where: { 
+      where: {
         id: req.params.id,
-        user_id: req.user.id 
+        user_id: req.user.id
       }
     });
 
