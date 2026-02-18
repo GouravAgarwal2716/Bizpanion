@@ -4,7 +4,7 @@ const { Order, Memory, sequelize } = require('../models');
 const { OpenAI } = require('openai');
 
 const router = express.Router();
-const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
+const { chatCompletion } = require('../openaiClient');
 
 /**
  * POST /agents/run
@@ -103,7 +103,7 @@ Return JSON: {
 
     // 3) Run agents in parallel
     const [insightResp, marketingResp, designResp] = await Promise.all([
-      openai.chat.completions.create({
+      chatCompletion({
         model: 'gpt-4o',
         messages: [
           { role: 'system', content: 'You are an analytics Insight Agent. Be concise and helpful.' },
@@ -112,7 +112,7 @@ Return JSON: {
         max_tokens: 220,
         temperature: 0.6
       }).catch(e => ({ error: e?.message })),
-      openai.chat.completions.create({
+      chatCompletion({
         model: 'gpt-4o',
         response_format: { type: 'json_object' },
         messages: [
@@ -309,11 +309,13 @@ Keep it concise and practical. Tailor to the persona if present.
     try {
       data = JSON.parse(resp.choices?.[0]?.message?.content || '{}');
     } catch {
-      data = { actions: [
-        { title: 'Optimize high-revenue channel creatives', why: 'Lift CTR and ROAS quickly.', impact: 'High' },
-        { title: 'Dormant-customer comeback flow', why: 'Recover lapsed users with incentives.', impact: 'Medium' },
-        { title: 'Bundle top SKUs', why: 'Increase AOV with targeted bundles.', impact: 'Medium' }
-      ]};
+      data = {
+        actions: [
+          { title: 'Optimize high-revenue channel creatives', why: 'Lift CTR and ROAS quickly.', impact: 'High' },
+          { title: 'Dormant-customer comeback flow', why: 'Recover lapsed users with incentives.', impact: 'Medium' },
+          { title: 'Bundle top SKUs', why: 'Increase AOV with targeted bundles.', impact: 'Medium' }
+        ]
+      };
     }
 
     // Persist as agent_context for timeline

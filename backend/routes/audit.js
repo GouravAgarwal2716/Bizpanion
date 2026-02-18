@@ -6,7 +6,7 @@ const { OpenAI } = require('openai');
 const { Memory } = require('../models');
 
 const router = express.Router();
-const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
+const { chatCompletion } = require('../openaiClient');
 
 /**
  * GET /audit/report
@@ -67,16 +67,16 @@ Return 4-6 bullet points covering:
 - Logo direction (one-liner)
 - Quick wins this month
 Keep it crisp and actionable (max ~120 words).`;
-      const resp = await openai.chat.completions.create({
-        model: 'gpt-4o',
+      const completion = await chatCompletion({
+        model: "gpt-4o",
         messages: [
-          { role: 'system', content: 'You are a senior brand strategist for SMEs in India.' },
-          { role: 'user', content: prompt }
+          { role: "system", content: "You are a senior business auditor. Analyze the following data and provide a risk score (0-100), key risks, and compliance suggestions." },
+          { role: "user", content: prompt } // Changed from auditPrompt to prompt to match context
         ],
-        max_tokens: 220,
-        temperature: 0.6
+        max_tokens: 600,
+        temperature: 0.6 // Moved temperature inside the chatCompletion call
       });
-      brandReco = (resp.choices?.[0]?.message?.content || '').trim() || brandReco;
+      brandReco = (completion || '').trim() || brandReco; // Changed from resp.choices to completion
       // persist in Memory for timeline/context
       try {
         await Memory.create({
@@ -84,8 +84,8 @@ Keep it crisp and actionable (max ~120 words).`;
           type: 'agent_context',
           content: JSON.stringify({ advisor: 'brand', notes: brandReco, at: new Date().toISOString() })
         });
-      } catch {}
-    } catch {}
+      } catch { }
+    } catch { }
 
     // Prepare PDF stream
     res.setHeader('Content-Type', 'application/pdf');

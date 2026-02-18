@@ -3,7 +3,7 @@ const auth = require('../middlewares/auth');
 const { OpenAI } = require('openai');
 
 const router = express.Router();
-const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
+const { chatCompletion } = require('../openaiClient');
 
 /**
  * POST /brand/generate
@@ -47,7 +47,7 @@ Constraints:
 - Tailor choices to the industry and tone.
 `;
 
-    const completion = await openai.chat.completions.create({
+    const completion = await chatCompletion({
       model: 'gpt-4o',
       response_format: { type: 'json_object' },
       messages: [
