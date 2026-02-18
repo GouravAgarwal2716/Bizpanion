@@ -2,6 +2,8 @@ const express = require('express');
 const auth = require('../middlewares/auth');
 const { Connection, Memory, Order, sequelize } = require('../models');
 const { chatCompletion } = require('../openaiClient');
+const PDFDocument = require('pdfkit');
+const router = express.Router();
 
 async function generateAiInsights(kpis, connections, userId) {
   const connectionStatus = connections.map(c => `${c.name}: ${c.connected ? 'Connected' : 'Not Connected'}`).join(', ');
